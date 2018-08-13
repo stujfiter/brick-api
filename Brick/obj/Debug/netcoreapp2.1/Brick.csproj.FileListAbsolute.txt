@@ -1,0 +1,14 @@
+/Users/kearl/work/brick/Brick/bin/Debug/netcoreapp2.1/Brick.deps.json
+/Users/kearl/work/brick/Brick/bin/Debug/netcoreapp2.1/Brick.runtimeconfig.json
+/Users/kearl/work/brick/Brick/bin/Debug/netcoreapp2.1/Brick.runtimeconfig.dev.json
+/Users/kearl/work/brick/Brick/bin/Debug/netcoreapp2.1/Brick.dll
+/Users/kearl/work/brick/Brick/bin/Debug/netcoreapp2.1/Brick.pdb
+/Users/kearl/work/brick/Brick/obj/Debug/netcoreapp2.1/Brick.csprojAssemblyReference.cache
+/Users/kearl/work/brick/Brick/obj/Debug/netcoreapp2.1/Brick.csproj.CoreCompileInputs.cache
+/Users/kearl/work/brick/Brick/obj/Debug/netcoreapp2.1/Brick.RazorAssemblyInfo.cache
+/Users/kearl/work/brick/Brick/obj/Debug/netcoreapp2.1/Brick.RazorAssemblyInfo.cs
+/Users/kearl/work/brick/Brick/obj/Debug/netcoreapp2.1/Brick.AssemblyInfoInputs.cache
+/Users/kearl/work/brick/Brick/obj/Debug/netcoreapp2.1/Brick.AssemblyInfo.cs
+/Users/kearl/work/brick/Brick/obj/Debug/netcoreapp2.1/Brick.RazorTargetAssemblyInfo.cache
+/Users/kearl/work/brick/Brick/obj/Debug/netcoreapp2.1/Brick.dll
+/Users/kearl/work/brick/Brick/obj/Debug/netcoreapp2.1/Brick.pdb
