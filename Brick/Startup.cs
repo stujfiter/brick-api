@@ -29,6 +29,14 @@ namespace Brick
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             services.AddSingleton<PieceStore, InMemoryPieceStore>();
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAllOrigins",
+                    builder =>
+                    {
+                        builder.AllowAnyOrigin();
+                    });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -44,7 +52,9 @@ namespace Brick
             }
 
             // app.UseHttpsRedirection();
+            app.UseCors("AllowAllOrigins");
             app.UseMvc();
+            
         }
     }
 }
