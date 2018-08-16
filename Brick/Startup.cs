@@ -21,15 +21,19 @@ namespace Brick
         {
             Configuration = configuration;
         }
-
+        
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            if (Environment.GetEnvironmentVariable("STORAGE") == "POSTGRESQL")
+                services.AddSingleton<PieceStore, PostgreSqlPieceStore>();
+            else
+                services.AddSingleton<PieceStore, InMemoryPieceStore>();
+
             services.AddCors();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
-            services.AddSingleton<PieceStore, InMemoryPieceStore>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
