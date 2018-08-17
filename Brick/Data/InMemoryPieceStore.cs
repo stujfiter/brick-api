@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Brick.Domain;
 using Microsoft.Data.Sqlite;
@@ -18,8 +19,12 @@ namespace Brick.Data
             createTableCommand.CommandText = @"CREATE TABLE piece (description TEXT)";
             createTableCommand.ExecuteNonQuery();
 
+            var alterTableCommand = connection.CreateCommand();
+            alterTableCommand.CommandText = @"ALTER TABLE piece ADD COLUMN partNumber TEXT";
+            alterTableCommand.ExecuteNonQuery();
+
             var insertPieceCommand = connection.CreateCommand();
-            insertPieceCommand.CommandText = @"INSERT INTO piece (description) VALUES ('2x4')";
+            insertPieceCommand.CommandText = @"INSERT INTO piece (description, partNumber) VALUES ('2x4', '3001')";
             insertPieceCommand.ExecuteNonQuery();
 
         }
@@ -29,13 +34,14 @@ namespace Brick.Data
             List<Piece> pieces = new List<Piece>();
 
             var selectPieceQuery = connection.CreateCommand();
-            selectPieceQuery.CommandText = @"SELECT description FROM piece";
+            selectPieceQuery.CommandText = @"SELECT partNumber, description FROM piece";
             var reader = selectPieceQuery.ExecuteReader();
 
             while (reader.Read())
             {
                 Piece p = new Piece();
-                p.Description = reader.GetString(0);
+                p.PartNumber = SafeGetString(reader, 0);
+                p.Description = reader.GetString(1);
                 pieces.Add(p);
             }
 
@@ -45,10 +51,22 @@ namespace Brick.Data
         public void Save(Piece piece)
         {
             var command = connection.CreateCommand();
-            command.CommandText = "INSERT INTO piece (description) VALUES (@description)";
+            command.CommandText = "INSERT INTO piece (partNumber, description) VALUES (@partNumber, @description)";
+            
             SqliteParameter descriptionParameter = new SqliteParameter("@description", piece.Description);
             command.Parameters.Add(descriptionParameter);
+
+            SqliteParameter partNumberParameter = new SqliteParameter("@partNumber", piece.PartNumber ?? (object)DBNull.Value);
+            command.Parameters.Add(descriptionParameter);
+
             command.ExecuteNonQuery();
+        }
+
+        public static string SafeGetString(DbDataReader reader, int colIndex)
+        {
+            if(!reader.IsDBNull(colIndex))
+                return reader.GetString(colIndex);
+            return string.Empty;
         }
     }
 }

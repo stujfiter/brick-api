@@ -27,10 +27,16 @@ namespace Brick
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            if (Environment.GetEnvironmentVariable("STORAGE") == "POSTGRESQL")
-                services.AddSingleton<PieceStore, PostgreSqlPieceStore>();
-            else
-                services.AddSingleton<PieceStore, InMemoryPieceStore>();
+            switch (Environment.GetEnvironmentVariable("STORAGE"))
+            {
+                case "POSTGRESQL":
+                    services.AddSingleton<PieceStore, PostgreSqlPieceStore>();
+                    break;
+                case "INMEMORY":
+                default:
+                    services.AddSingleton<PieceStore, InMemoryPieceStore>();
+                    break;
+            }
 
             services.AddCors();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);

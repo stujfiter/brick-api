@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using Brick.Domain;
 using Npgsql;
 
@@ -12,6 +14,7 @@ namespace Brick.Data {
         public PostgreSqlPieceStore() {
             createDatabaseIfNotExists();
             createTableIfNotExits();
+            createColumnIfNotExists("piece", "partnumber");
 
         }
 
@@ -23,12 +26,14 @@ namespace Brick.Data {
             {
                 conn.Open();
 
-                using (var cmd = new NpgsqlCommand("SELECT description FROM piece", conn))
+                using (var cmd = new NpgsqlCommand("SELECT partnumber, description FROM piece", conn))
                 using (var reader = cmd.ExecuteReader())
                     while (reader.Read())
                     {
                         Piece piece = new Piece();
-                        piece.Description = reader.GetString(0);
+
+                        piece.PartNumber = SafeGetString(reader, 0);
+                        piece.Description = reader.GetString(1);
                         results.Add(piece);
                     }
             }
@@ -36,9 +41,26 @@ namespace Brick.Data {
             return results;
         }
 
+        public static string SafeGetString(DbDataReader reader, int colIndex)
+        {
+            if(!reader.IsDBNull(colIndex))
+                return reader.GetString(colIndex);
+            return string.Empty;
+        }
+
         public void Save(Piece piece)
         {
-            
+            using (var conn = getConnection(applicationDataStore))
+            {
+                conn.Open();
+
+                using (var cmd = new NpgsqlCommand($"INSERT INTO piece (partnumber, description) VALUES (@partNumber, @description)", conn))
+                {
+                    cmd.Parameters.AddWithValue("partNumber", piece.PartNumber ?? (object)DBNull.Value);
+                    cmd.Parameters.AddWithValue("description", piece.Description);
+                    cmd.ExecuteNonQuery();
+                }
+            }
         }
 
         NpgsqlConnection getConnection(string database)
@@ -80,6 +102,25 @@ namespace Brick.Data {
                 if (!tableExists)
                 {
                     using (var cmd = new NpgsqlCommand("CREATE TABLE piece (description varchar(100) not null);", conn))
+                        cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        void createColumnIfNotExists(string tableName, string columnName)
+        {
+            var columnExists = false;
+            using (var conn = getConnection(applicationDataStore))
+            {
+                conn.Open();
+
+                using (var cmd = new NpgsqlCommand("SELECT attname FROM pg_attribute WHERE attrelid = (SELECT oid FROM pg_class WHERE relname = 'piece') AND attname = 'partnumber';", conn))
+                using (var reader = cmd.ExecuteReader())
+                    columnExists = reader.Read();
+
+                if (!columnExists)
+                {
+                    using(var cmd = new NpgsqlCommand("ALTER TABLE piece ADD COLUMN partnumber varchar(100);",conn))
                         cmd.ExecuteNonQuery();
                 }
             }
