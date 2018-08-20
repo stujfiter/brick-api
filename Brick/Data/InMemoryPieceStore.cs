@@ -22,11 +22,6 @@ namespace Brick.Data
             var alterTableCommand = connection.CreateCommand();
             alterTableCommand.CommandText = @"ALTER TABLE piece ADD COLUMN partNumber TEXT";
             alterTableCommand.ExecuteNonQuery();
-
-            var insertPieceCommand = connection.CreateCommand();
-            insertPieceCommand.CommandText = @"INSERT INTO piece (description, partNumber) VALUES ('2x4', '3001')";
-            insertPieceCommand.ExecuteNonQuery();
-
         }
 
         public List<Piece> FindPieces()
