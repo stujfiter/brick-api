@@ -57,7 +57,7 @@ namespace Brick.Data
             command.Parameters.Add(descriptionParameter);
 
             SqliteParameter partNumberParameter = new SqliteParameter("@partNumber", piece.PartNumber ?? (object)DBNull.Value);
-            command.Parameters.Add(descriptionParameter);
+            command.Parameters.Add(partNumberParameter);
 
             command.ExecuteNonQuery();
         }
