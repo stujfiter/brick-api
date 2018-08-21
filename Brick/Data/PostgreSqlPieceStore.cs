@@ -65,7 +65,9 @@ namespace Brick.Data {
 
         NpgsqlConnection getConnection(string database)
         {
-            var connString = $"Host=localhost;Username=postgres;Password=changeme;Database={database}";
+            var hostName = Environment.GetEnvironmentVariable("STORAGE_HOST") ?? "localhost";
+            var password = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD");
+            var connString = $"Host={hostName};Username=postgres;Password={password};Database={database}";
             return new NpgsqlConnection(connString);
         }
 

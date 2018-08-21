@@ -1,8 +1,26 @@
 version: "3"
+networks:
+  brick-default:
+
 services:
   postgres:
     image: postgres
     ports: 
       - "5432:5432"
+    networks:
+      brick-default:
+        aliases:
+          - postgres
     environment:
-      - POSTGRES_PASSWORD=changeme
+      - POSTGRES_PASSWORD
+
+  brick-api:
+    build: ./Brick
+    ports:
+      - "5000:5000"
+    networks:
+      - brick-default
+    environment:
+      - STORAGE
+      - STORAGE_HOST
+      - POSTGRES_PASSWORD
