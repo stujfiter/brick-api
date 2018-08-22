@@ -1,0 +1,13 @@
+
+SELECT execute($$
+    ALTER TABLE piece ADD COLUMN partnumber TEXT;
+$$)
+WHERE NOT EXISTS(
+    SELECT attname 
+    FROM pg_attribute 
+    WHERE attrelid = (
+        SELECT oid 
+        FROM pg_class 
+        WHERE relname = 'piece') 
+    AND attname = 'partnumber'
+);

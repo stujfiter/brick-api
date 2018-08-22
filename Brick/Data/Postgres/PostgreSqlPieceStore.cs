@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.IO;
 using Brick.Domain;
 using Npgsql;
 
@@ -10,12 +11,14 @@ namespace Brick.Data {
         string applicationDataStore = "brick";
         string systemDataStore = "template1";
 
-
         public PostgreSqlPieceStore() {
-            createDatabaseIfNotExists();
-            createTableIfNotExits();
-            createColumnIfNotExists("piece", "partnumber");
 
+            string[] pathElements = {"Data", "Postgres", "deltas"};
+            string path = Path.Combine(pathElements);
+
+            createDatabaseIfNotExists();
+            migrate(path, "0000_InitializeDB.psql");
+            migrate(path, "0001_AddPiecePartNumber.psql");
         }
 
         public List<Piece> FindPieces()
@@ -41,13 +44,6 @@ namespace Brick.Data {
             return results;
         }
 
-        public static string SafeGetString(DbDataReader reader, int colIndex)
-        {
-            if(!reader.IsDBNull(colIndex))
-                return reader.GetString(colIndex);
-            return string.Empty;
-        }
-
         public void Save(Piece piece)
         {
             using (var conn = getConnection(applicationDataStore))
@@ -61,6 +57,13 @@ namespace Brick.Data {
                     cmd.ExecuteNonQuery();
                 }
             }
+        }
+
+        public static string SafeGetString(DbDataReader reader, int colIndex)
+        {
+            if(!reader.IsDBNull(colIndex))
+                return reader.GetString(colIndex);
+            return string.Empty;
         }
 
         NpgsqlConnection getConnection(string database)
@@ -78,53 +81,27 @@ namespace Brick.Data {
             {
                 conn.Open();
 
-                using (var cmd = new NpgsqlCommand("SELECT 1 FROM pg_database WHERE datname='brick';", conn))
+                using (var cmd = new NpgsqlCommand($"SELECT 1 FROM pg_database WHERE datname='{applicationDataStore}';", conn))
                 using (var reader = cmd.ExecuteReader())
                     databaseExists = reader.Read();
 
                 if (!databaseExists)
                 {
-                    using (var cmd = new NpgsqlCommand("CREATE DATABASE brick;", conn))
+                    using (var cmd = new NpgsqlCommand($"CREATE DATABASE {applicationDataStore};", conn))
                         cmd.ExecuteNonQuery();
                 }
             }
         }
 
-        void createTableIfNotExits()
-        {
-            var tableExists = false;
+        void migrate(string path, string fileName)
+        {   
+            var initDB = File.ReadAllText(Path.Combine(path, fileName));
             using (var conn = getConnection(applicationDataStore))
             {
                 conn.Open();
 
-                using (var cmd = new NpgsqlCommand("SELECT 1 FROM pg_tables WHERE schemaname = 'public' AND tablename = 'piece';", conn))
-                using (var reader = cmd.ExecuteReader())
-                    tableExists = reader.Read();
-
-                if (!tableExists)
-                {
-                    using (var cmd = new NpgsqlCommand("CREATE TABLE piece (description varchar(100) not null);", conn))
-                        cmd.ExecuteNonQuery();
-                }
-            }
-        }
-
-        void createColumnIfNotExists(string tableName, string columnName)
-        {
-            var columnExists = false;
-            using (var conn = getConnection(applicationDataStore))
-            {
-                conn.Open();
-
-                using (var cmd = new NpgsqlCommand("SELECT attname FROM pg_attribute WHERE attrelid = (SELECT oid FROM pg_class WHERE relname = 'piece') AND attname = 'partnumber';", conn))
-                using (var reader = cmd.ExecuteReader())
-                    columnExists = reader.Read();
-
-                if (!columnExists)
-                {
-                    using(var cmd = new NpgsqlCommand("ALTER TABLE piece ADD COLUMN partnumber varchar(100);",conn))
-                        cmd.ExecuteNonQuery();
-                }
+                var cmd = new NpgsqlCommand(initDB, conn);
+                cmd.ExecuteNonQuery();
             }
         }
     }

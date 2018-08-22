@@ -1,0 +1,10 @@
+CREATE OR REPLACE FUNCTION execute(TEXT) RETURNS VOID AS $$
+BEGIN EXECUTE $1; END;
+$$ LANGUAGE plpgsql STRICT;
+
+SELECT execute($$
+    CREATE TABLE piece (
+        description     TEXT
+    );
+$$)
+WHERE NOT exists(SELECT * FROM information_schema.tables WHERE table_name = 'piece');
