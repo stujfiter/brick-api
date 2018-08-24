@@ -27,9 +27,20 @@ namespace Brick.Controllers {
         }
 
         [HttpPost]
-        public void Post([FromBody] Piece piece)
+        [ProducesResponseType(201)]
+        [ProducesResponseType(400)]
+        public ActionResult Post([FromBody] Piece piece)
         {
+            if (string.IsNullOrWhiteSpace(piece.PartNumber)) {
+                return BadRequest("Invalid Part Number");
+            }
+
+            if (string.IsNullOrWhiteSpace(piece.Description)) {
+                return BadRequest("Invalid Description");
+            }
+
             store.Save(piece);
+            return NoContent();
         }
     }
 }

@@ -1,0 +1,4 @@
+update piece set partnumber='' where partnumber is null;
+alter table piece alter column partnumber set not null;
+update piece set description='' where description is null;
+alter table piece alter column description set not null;

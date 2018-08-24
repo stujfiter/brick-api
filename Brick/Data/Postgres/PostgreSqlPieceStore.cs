@@ -19,6 +19,7 @@ namespace Brick.Data {
             createDatabaseIfNotExists();
             migrate(path, "0000_InitializeDB.psql");
             migrate(path, "0001_AddPiecePartNumber.psql");
+            migrate(path, "0002_AddNotNullConstraints.psql");
         }
 
         public List<Piece> FindPieces()

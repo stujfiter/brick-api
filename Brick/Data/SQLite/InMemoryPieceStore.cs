@@ -16,12 +16,8 @@ namespace Brick.Data
             connection.Open();
 
             var createTableCommand = connection.CreateCommand();
-            createTableCommand.CommandText = @"CREATE TABLE piece (description TEXT)";
+            createTableCommand.CommandText = @"CREATE TABLE piece (description TEXT not null, partNumber TEXT not null)";
             createTableCommand.ExecuteNonQuery();
-
-            var alterTableCommand = connection.CreateCommand();
-            alterTableCommand.CommandText = @"ALTER TABLE piece ADD COLUMN partNumber TEXT";
-            alterTableCommand.ExecuteNonQuery();
         }
 
         public List<Piece> FindPieces()
