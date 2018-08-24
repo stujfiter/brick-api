@@ -15,4 +15,8 @@
     <PackageReference Include="npgsql" Version="4.0.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="Data\Postgres\deltas\*.psql" CopyToOutputDirectory="Always" />
+  </ItemGroup>
+
 </Project>
