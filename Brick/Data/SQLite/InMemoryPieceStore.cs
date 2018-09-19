@@ -16,7 +16,10 @@ namespace Brick.Data
             connection.Open();
 
             var createTableCommand = connection.CreateCommand();
-            createTableCommand.CommandText = @"CREATE TABLE piece (description TEXT not null, partNumber TEXT not null)";
+            createTableCommand.CommandText = @"CREATE TABLE piece (description TEXT not null, partNumber TEXT not null, image BLOB)";
+            createTableCommand.ExecuteNonQuery();
+
+            createTableCommand.CommandText = @"CREATE TABLE inventory (partnumber TEXT not null, quantity INTEGER not null)";
             createTableCommand.ExecuteNonQuery();
         }
 
@@ -25,7 +28,7 @@ namespace Brick.Data
             List<Piece> pieces = new List<Piece>();
 
             var selectPieceQuery = connection.CreateCommand();
-            selectPieceQuery.CommandText = @"SELECT partNumber, description FROM piece";
+            selectPieceQuery.CommandText = @"SELECT partNumber, description, image FROM piece";
             var reader = selectPieceQuery.ExecuteReader();
 
             while (reader.Read())
@@ -33,6 +36,7 @@ namespace Brick.Data
                 Piece p = new Piece();
                 p.PartNumber = SafeGetString(reader, 0);
                 p.Description = reader.GetString(1);
+                p.Image = SafeGetString(reader, 2);
                 pieces.Add(p);
             }
 
@@ -42,13 +46,16 @@ namespace Brick.Data
         public void Save(Piece piece)
         {
             var command = connection.CreateCommand();
-            command.CommandText = "INSERT INTO piece (partNumber, description) VALUES (@partNumber, @description)";
+            command.CommandText = "INSERT INTO piece (partNumber, description, image) VALUES (@partNumber, @description, @image)";
             
             SqliteParameter descriptionParameter = new SqliteParameter("@description", piece.Description);
             command.Parameters.Add(descriptionParameter);
 
             SqliteParameter partNumberParameter = new SqliteParameter("@partNumber", piece.PartNumber ?? (object)DBNull.Value);
             command.Parameters.Add(partNumberParameter);
+
+            SqliteParameter imageParameter = new SqliteParameter("@image", piece.Image ?? (object)DBNull.Value);
+            command.Parameters.Add(imageParameter);
 
             command.ExecuteNonQuery();
         }

@@ -34,5 +34,12 @@ namespace BrickTest.Integration
             Piece p = new Piece() {Description="2x2"};
             store.Save(p);
         }
+
+        [TestMethod]
+        public void ShouldStoreAndRetrieveInventoryItem()
+        {
+            InventoryItem i = new InventoryItem() { PartNumber="1234", Quantity=1 };
+            store.SaveItem(i);
+        }
     }
 }
