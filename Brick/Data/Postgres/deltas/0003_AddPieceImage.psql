@@ -1,0 +1,13 @@
+-- alter table piece add column image text;
+SELECT execute($$
+    ALTER TABLE piece ADD COLUMN image TEXT;
+$$)
+WHERE NOT EXISTS(
+    SELECT attname 
+    FROM pg_attribute 
+    WHERE attrelid = (
+        SELECT oid 
+        FROM pg_class 
+        WHERE relname = 'piece') 
+    AND attname = 'image'
+);

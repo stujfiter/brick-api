@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.IO;
+using System.Text;
 using Brick.Domain;
 using Npgsql;
 
@@ -20,6 +21,7 @@ namespace Brick.Data {
             migrate(path, "0000_InitializeDB.psql");
             migrate(path, "0001_AddPiecePartNumber.psql");
             migrate(path, "0002_AddNotNullConstraints.psql");
+            migrate(path, "0003_AddPieceImage.psql");
         }
 
         public List<Piece> FindPieces()
@@ -30,14 +32,15 @@ namespace Brick.Data {
             {
                 conn.Open();
 
-                using (var cmd = new NpgsqlCommand("SELECT partnumber, description FROM piece", conn))
+                using (var cmd = new NpgsqlCommand("SELECT partnumber, description, image FROM piece", conn))
                 using (var reader = cmd.ExecuteReader())
                     while (reader.Read())
                     {
                         Piece piece = new Piece();
 
                         piece.PartNumber = SafeGetString(reader, 0);
-                        piece.Description = reader.GetString(1);
+                        piece.Description = SafeGetString(reader, 1);
+                        piece.Image = SafeGetString(reader, 2);
                         results.Add(piece);
                     }
             }
@@ -51,10 +54,11 @@ namespace Brick.Data {
             {
                 conn.Open();
 
-                using (var cmd = new NpgsqlCommand($"INSERT INTO piece (partnumber, description) VALUES (@partNumber, @description)", conn))
+                using (var cmd = new NpgsqlCommand($"INSERT INTO piece (partnumber, description, image) VALUES (@partNumber, @description, @image)", conn))
                 {
                     cmd.Parameters.AddWithValue("partNumber", piece.PartNumber ?? (object)DBNull.Value);
                     cmd.Parameters.AddWithValue("description", piece.Description);
+                    cmd.Parameters.AddWithValue("image", piece.Image ?? (object)DBNull.Value);
                     cmd.ExecuteNonQuery();
                 }
             }

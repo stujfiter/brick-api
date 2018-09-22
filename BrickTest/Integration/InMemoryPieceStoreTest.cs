@@ -9,6 +9,7 @@ namespace BrickTest.Integration
     public class InMemoryPieceStoreTest
     {
         static InMemoryPieceStore store;
+        static string tinyJpeg = "ABBKRklGAAEBAQBIAEgAAABDAAALCAABAAEBAREAABQQAQAAAAAAAAAAAAAAAAAAAAAACAEBAAE/EA==";
 
         [ClassInitialize]
         public static void Init(TestContext context)
@@ -19,12 +20,14 @@ namespace BrickTest.Integration
         [TestMethod]
         public void ShouldStoreAndRetrievePieceProperly()
         {
-            Piece p = new Piece() {PartNumber="3002", Description="2x2"};
+            Piece p = new Piece() {PartNumber="3002", Description="2x2", Image=tinyJpeg};
             store.Save(p);
 
             Piece retrievedPiece = store.FindPieces()[0];
             Assert.AreEqual(p.PartNumber, retrievedPiece.PartNumber);
             Assert.AreEqual(p.Description, retrievedPiece.Description);
+            Assert.AreEqual(p.Image, retrievedPiece.Image);
+
         }
 
         [TestMethod]
@@ -33,13 +36,6 @@ namespace BrickTest.Integration
         {
             Piece p = new Piece() {Description="2x2"};
             store.Save(p);
-        }
-
-        [TestMethod]
-        public void ShouldStoreAndRetrieveInventoryItem()
-        {
-            InventoryItem i = new InventoryItem() { PartNumber="1234", Quantity=1 };
-            store.SaveItem(i);
         }
     }
 }
