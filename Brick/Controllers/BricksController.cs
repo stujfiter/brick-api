@@ -4,6 +4,7 @@ using Brick.Domain;
 using Microsoft.Data.Sqlite;
 using System.Data.Common;
 using Brick.Data;
+using Brick.Images;
 
 namespace Brick.Controllers {
 
@@ -13,10 +14,12 @@ namespace Brick.Controllers {
     {
 
         private PieceStore store;
+        private ImageProcessor imageProcessor;
 
-        public BricksController(PieceStore store)
+        public BricksController(PieceStore store, ImageProcessor imageProcessor)
         {
             this.store = store;
+            this.imageProcessor = imageProcessor;
         }
 
         // Get api/bricks
@@ -38,6 +41,8 @@ namespace Brick.Controllers {
             if (string.IsNullOrWhiteSpace(piece.Description)) {
                 return BadRequest("Invalid Description");
             }
+
+            piece.Image = imageProcessor.ResizeImage(piece.Image, 400, 400);
 
             store.Save(piece);
             return NoContent();
