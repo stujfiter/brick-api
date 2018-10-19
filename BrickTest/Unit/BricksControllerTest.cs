@@ -1,7 +1,10 @@
+using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.AspNetCore.Mvc;
 using Brick.Domain;
 using Brick.Controllers;
+using Brick.Data;
+using Brick.Images.ImageSharp;
 
 namespace BrickTest.Controllers
 {
@@ -14,7 +17,7 @@ namespace BrickTest.Controllers
         [TestInitialize]
         public void Initialize()
         {
-            controller = new BricksController(null);
+            controller = new BricksController(new InMemoryPieceStore(), new ImageSharpProcessor());
             piece = new Piece() { PartNumber="1234", Description="1x5" };
         }
 
@@ -38,6 +41,36 @@ namespace BrickTest.Controllers
             Assert.IsInstanceOfType(result, typeof(BadRequestObjectResult));
             BadRequestObjectResult badReqestResult = result as BadRequestObjectResult;
             Assert.AreEqual(badReqestResult.Value, "Invalid Description");
+        }
+
+        [TestMethod]
+        public void ShouldRejectPostsWithoutAuth()
+        {
+            Environment.SetEnvironmentVariable("AUTH_CODE", "blah");
+            ActionResult result = controller.Post(piece);
+            BadRequestObjectResult badRequestResult = result as BadRequestObjectResult;
+
+            Environment.SetEnvironmentVariable("AUTH_CODE", null);
+            Assert.IsNotNull(badRequestResult);
+            Assert.AreEqual(badRequestResult.Value, "Not Authorized");
+        }
+
+        [TestMethod]
+        public void ShouldAcceptPostsWhenAuthIsNotSpecified()
+        {
+            Environment.SetEnvironmentVariable("AUTH_CODE", null);
+
+            ActionResult result = controller.Post(piece);
+            Assert.IsTrue(result is NoContentResult);
+        }
+
+        [TestMethod]
+        public void ShouldAcceptPostsWhenAuthenticated()
+        {
+            Environment.SetEnvironmentVariable("AUTH_CODE", "foobar");
+
+            ActionResult result = controller.Post(piece, "foobar");
+            Assert.IsTrue(result is NoContentResult);
         }
     }
 }

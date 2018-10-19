@@ -12,7 +12,7 @@ namespace Brick.Data
         DbConnection connection;
 
         public InMemoryPieceStore() {
-            connection = new SqliteConnection("Data Source=InMemorySample;Mode=Memory;Cache=Shared");
+            connection = new SqliteConnection("Data Source=InMemorySample;Mode=Memory;Cache=Private");
             connection.Open();
 
             var createTableCommand = connection.CreateCommand();
