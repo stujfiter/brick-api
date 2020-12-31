@@ -1,11 +1,12 @@
 ﻿using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Brick.Data;
 using Brick.Images;
+using Microsoft.OpenApi.Models;
 
 namespace Brick
 {
@@ -32,25 +33,21 @@ namespace Brick
                     break;
             }
 
+            services.AddControllers();
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "dotnet_upgrade", Version = "v1" });
+            });
             services.AddSingleton<ImageProcessor, Images.ImageSharp.ImageSharpProcessor>();
 
             services.AddCors();
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddMvc();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
-            else
-            {
-                app.UseHsts();
-            }
-
-            // app.UseHttpsRedirection();
+            app.UseHttpsRedirection();
             app.UseCors(builder => {
                 builder
                     .AllowAnyHeader()
@@ -58,8 +55,23 @@ namespace Brick
                     .AllowAnyMethod();
             });
 
-            app.UseMvc();
-            
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+                app.UseSwagger();
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "dotnet_upgrade v1"));
+            }
+
+            app.UseHttpsRedirection();
+
+            app.UseRouting();
+
+            app.UseAuthorization();
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
         }
     }
 }

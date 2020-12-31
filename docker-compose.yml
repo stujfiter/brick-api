@@ -25,3 +25,5 @@ services:
       - STORAGE_HOST
       - POSTGRES_PASSWORD
       - AUTH_CODE
+    links:
+      - postgres

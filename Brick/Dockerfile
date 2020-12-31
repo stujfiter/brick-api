@@ -1,4 +1,4 @@
-FROM microsoft/dotnet:2.1-sdk AS builder
+FROM mcr.microsoft.com/dotnet/sdk:5.0.101-alpine3.12 AS builder
 WORKDIR /source
 
 # caches restore result by copying csproj file separately
@@ -9,7 +9,7 @@ RUN dotnet restore
 COPY . .
 RUN dotnet publish --output /app/ --configuration Release
 
-FROM microsoft/dotnet:2.1-aspnetcore-runtime
+FROM mcr.microsoft.com/dotnet/aspnet:5.0.1-alpine3.12
 WORKDIR /app
 COPY --from=builder /app .
 EXPOSE 5000
